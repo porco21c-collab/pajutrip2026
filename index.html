@@ -12,10 +12,10 @@
 // 1. 구글 드라이브에서 새 스프레드시트를 만듭니다.
 // 2. 메뉴 확장 프로그램 > Apps Script 를 열고, 안내받은 코드를 붙여넣은 뒤 "웹 앱으로 배포"합니다.
 // 3. 배포 후 나오는 웹 앱 URL을 아래 따옴표 안에 붙여넣습니다.
-window.PJH_APPS_SCRIPT_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL"; // 예: "https://script.google.com/macros/s/AKfycb.../exec"
+window.PJH_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqshjZmUVj66_ND89V7zUEC6mL8it2NWON2HkkFuBfIi0UNeFPrAqFQgVh2afEXXWa4w/exec"; // 예: "https://script.google.com/macros/s/AKfycb.../exec"
 
 window.__pjhReady = function () {
-  return window.PJH_APPS_SCRIPT_URL && window.PJH_APPS_SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbwqshjZmUVj66_ND89V7zUEC6mL8it2NWON2HkkFuBfIi0UNeFPrAqFQgVh2afEXXWa4w/exec";
+  return window.PJH_APPS_SCRIPT_URL && window.PJH_APPS_SCRIPT_URL !== "YOUR_APPS_SCRIPT_WEB_APP_URL";
 };
 
 window.__pjhSubmitEntry = function (data) {
