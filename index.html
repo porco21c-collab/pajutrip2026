@@ -33,14 +33,19 @@ window.__pjhSubmitEntry = function (data) {
 };
 
 // Apps Script는 fetch()로 직접 읽으면 CORS 오류가 나기 쉬워서, <script> 태그를 통한 JSONP 방식으로 불러옵니다.
+window.__pjhLastGoodEntries = window.__pjhLastGoodEntries || [];
+window.__pjhFetchInFlight = false;
 window.__pjhFetchEntries = function () {
   if (!window.__pjhReady()) return Promise.resolve([]);
+  if (window.__pjhFetchInFlight) return Promise.resolve(window.__pjhLastGoodEntries);
+  window.__pjhFetchInFlight = true;
   return new Promise(function (resolve) {
     var cbName = "__pjhCb" + Date.now() + Math.floor(Math.random() * 1000);
     var done = false;
     var cleanup = function () {
       delete window[cbName];
       if (scriptEl && scriptEl.parentNode) scriptEl.parentNode.removeChild(scriptEl);
+      window.__pjhFetchInFlight = false;
     };
     window[cbName] = function (rows) {
       if (done) return;
@@ -55,14 +60,20 @@ window.__pjhFetchEntries = function () {
         };
       });
       out.sort(function (a, b) { return (b.createdAt || "").localeCompare(a.createdAt || ""); });
+      window.__pjhLastGoodEntries = out;
       resolve(out);
       cleanup();
     };
     var scriptEl = document.createElement("script");
     scriptEl.src = window.PJH_APPS_SCRIPT_URL + "?action=list&callback=" + cbName;
-    scriptEl.onerror = function () { if (!done) { done = true; resolve([]); cleanup(); } };
+    scriptEl.onerror = function () {
+      if (!done) { done = true; resolve(window.__pjhLastGoodEntries); cleanup(); }
+    };
     document.body.appendChild(scriptEl);
-    setTimeout(function () { if (!done) { done = true; resolve([]); cleanup(); } }, 8000);
+    // 응답이 늦어도 직전에 정상적으로 받았던 목록을 유지해서 깜빡임을 막습니다.
+    setTimeout(function () {
+      if (!done) { done = true; resolve(window.__pjhLastGoodEntries); cleanup(); }
+    }, 20000);
   });
 };
 
@@ -86,7 +97,7 @@ window.__pjhMountAdmin = function () {
   if (mainRoot) mainRoot.parentNode.insertBefore(panel, mainRoot.nextSibling);
   document.getElementById("pjh-live-refresh").onclick = window.__pjhRefreshAdmin;
   window.__pjhRefreshAdmin();
-  window.__pjhAdminTimer = setInterval(window.__pjhRefreshAdmin, 8000);
+  window.__pjhAdminTimer = setInterval(window.__pjhRefreshAdmin, 12000);
 };
 
 window.__pjhRefreshAdmin = function () {
